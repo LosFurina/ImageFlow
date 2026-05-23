@@ -204,12 +204,13 @@ Create a `.env` file in the project root with the following settings:
 | `WORKER_POOL_SIZE` | No | `4` | Concurrent image processing workers |
 | `SPEED` | No | `5` | Encoding speed (0=slowest/best, 8=fastest) |
 
-### Frontend Configuration
+### Frontend Runtime Configuration
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | No | - | Backend API URL for frontend |
-| `NEXT_PUBLIC_REMOTE_PATTERNS` | No | - | Allowed image domains (comma-separated) |
+| `IMAGEFLOW_BACKEND_PORT` | No | `8686` | Public backend port used for automatic host-based runtime URL resolution |
+| `IMAGEFLOW_PUBLIC_BACKEND_URL` | No | - | Explicit public backend URL for reverse proxy/domain deployments; leave empty for `current-host:8686` auto resolution |
+| `NEXT_PUBLIC_REMOTE_PATTERNS` | No | - | Optional allowed image domains for Next.js image configuration |
 
 ### Example Configuration
 
@@ -230,9 +231,12 @@ WORKER_THREADS=4
 WORKER_POOL_SIZE=4
 MAX_UPLOAD_COUNT=20
 
-# Frontend 
-NEXT_PUBLIC_API_URL=http://backend:8686
-NEXT_PUBLIC_REMOTE_PATTERNS=http://backend:8686,https://s3.url
+# Frontend runtime
+# Leave IMAGEFLOW_PUBLIC_BACKEND_URL empty for automatic host-based resolution.
+# Set it only when using a public reverse proxy/domain.
+IMAGEFLOW_BACKEND_PORT=8686
+IMAGEFLOW_PUBLIC_BACKEND_URL=
+NEXT_PUBLIC_REMOTE_PATTERNS=
 ```
 
 ## API Reference
@@ -393,7 +397,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ImageFlow provides a separate external OpenAPI layer under `/openapi/*` when `AKSK_ENABLED=true`.
 
-- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer <API_KEY>`.
+- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer ***
 - External OpenAPI requests use AK/SK HMAC headers: `X-Access-Key`, `X-Signature`, `X-Timestamp`.
 - AK/SK credentials are managed through Bearer-token-protected admin APIs under `/api/admin/aksk/*` and the `/manage` frontend AK/SK tab.
 - Swagger UI is available at `/openapi/docs` when enabled.

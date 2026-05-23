@@ -1,6 +1,7 @@
-import { resolveApiUrl } from "./apiBase";
+import { resolveApiUrl } from "./runtimeConfig";
 
 const API_KEY_KEY = "imageflow_api_key";
+
 export const getApiKey = (): string | null => {
   if (typeof window !== "undefined") {
     return localStorage.getItem(API_KEY_KEY);
@@ -22,7 +23,7 @@ export const removeApiKey = (): void => {
 
 export const validateApiKey = async (apiKey: string): Promise<boolean> => {
   try {
-    const response = await fetch(resolveApiUrl("/api/validate-api-key").toString(), {
+    const response = await fetch((await resolveApiUrl("/api/validate-api-key")).toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +36,7 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
       console.error("API Key validation failed:", {
         status: response.status,
         statusText: response.statusText,
-        responseText: errorText
+        responseText: errorText,
       });
       return false;
     }

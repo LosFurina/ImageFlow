@@ -1,8 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { buildRuntimeConfig } from "../../utils/serverRuntimeConfig";
 
-export async function GET() {
-  return NextResponse.json({
-    apiUrl: process.env.API_URL || "",
-    remotePatterns: process.env.NEXT_PUBLIC_REMOTE_PATTERNS || "",
-  });
+export async function GET(request: NextRequest) {
+  return NextResponse.json(buildRuntimeConfig(request));
 }

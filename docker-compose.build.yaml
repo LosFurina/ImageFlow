@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Local build version - use this for development and testing
 # Usage: docker-compose -f docker-compose.build.yaml up --build -d
 
@@ -35,12 +33,13 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_DB=${REDIS_DB:-0}
       - REDIS_TLS_ENABLED=${REDIS_TLS_ENABLED:-false}
+      - AKSK_ENABLED=${AKSK_ENABLED:-true}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
     depends_on:
       - redis
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8686/api/random || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8686/openapi/docs/index.html || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -56,10 +55,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8686}
-      - NEXT_PUBLIC_REMOTE_PATTERNS=${NEXT_PUBLIC_REMOTE_PATTERNS:-http://backend:8686}
+      - IMAGEFLOW_BACKEND_PORT=${IMAGEFLOW_BACKEND_PORT:-8686}
+      - IMAGEFLOW_PUBLIC_BACKEND_URL=${IMAGEFLOW_PUBLIC_BACKEND_URL:-}
+      - NEXT_PUBLIC_REMOTE_PATTERNS=${NEXT_PUBLIC_REMOTE_PATTERNS:-}
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3000/", "||", "exit", "1" ]
+      test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
       interval: 30s
       timeout: 10s
       retries: 3

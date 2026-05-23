@@ -1,22 +1,23 @@
 import { useState, useEffect } from "react";
-
-interface Config {
-  apiUrl: string;
-  remotePatterns: string;
-}
+import type { RuntimeConfig } from "../utils/runtimeConfig";
+import { setRuntimeConfig } from "../utils/runtimeConfig";
 
 export function useConfig() {
-  const [config, setConfig] = useState<Config>({
+  const [config, setConfig] = useState<RuntimeConfig>({
     apiUrl: "",
+    assetBaseUrl: "",
+    openapiDocsUrl: "",
     remotePatterns: "",
+    backendPort: "8686",
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/config")
+    fetch("/api/config", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
-        setConfig(data);
+        const normalized = setRuntimeConfig(data);
+        setConfig(normalized);
         setLoading(false);
       })
       .catch((err) => {

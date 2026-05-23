@@ -1,5 +1,5 @@
 import { getApiKey } from "./auth";
-import { resolveApiUrl, setRuntimeApiBaseUrl } from "./apiBase";
+import { loadRuntimeConfig, resolveApiUrl } from "./runtimeConfig";
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
@@ -7,20 +7,19 @@ interface RequestOptions extends RequestInit {
 
 interface ConfigResponse {
   apiUrl: string;
+  assetBaseUrl: string;
+  openapiDocsUrl: string;
   remotePatterns: string;
+  backendPort: string;
 }
 
 let hasInitialized = false;
 
-async function initializeBaseUrl() {
+async function initializeRuntimeConfig() {
   try {
-    const response = await fetch("/api/config");
-    const config: ConfigResponse = await response.json();
-    if (config.apiUrl) {
-      setRuntimeApiBaseUrl(config.apiUrl);
-    }
+    await loadRuntimeConfig();
   } catch (error) {
-    console.error("Failed to fetch API config:", error);
+    console.error("Failed to initialize runtime config:", error);
   }
 }
 
@@ -29,24 +28,20 @@ export async function request<T>(
   options: RequestOptions = {}
 ): Promise<T> {
   if (!hasInitialized) {
-    await initializeBaseUrl();
+    await initializeRuntimeConfig();
     hasInitialized = true;
   }
 
   const apiKey = getApiKey();
-
   const { params, ...restOptions } = options;
 
-  // 构建URL
-  const url: URL = resolveApiUrl(endpoint);
-  console.log(url.toString());
+  const url: URL = await resolveApiUrl(endpoint);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.append(key, value);
     }
   }
 
-  // 添加认证头
   const headers = {
     Authorization: `Bearer ${apiKey}`,
     ...options.headers,

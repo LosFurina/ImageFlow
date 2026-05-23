@@ -7,11 +7,11 @@ RUN npm install
 
 COPY frontend/ ./
 
-ARG NEXT_PUBLIC_API_URL=http://backend:8686
-ARG NEXT_PUBLIC_REMOTE_PATTERNS=https://backend:8686
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_REMOTE_PATTERNS=$NEXT_PUBLIC_REMOTE_PATTERNS
-
+# Public backend URL is resolved at runtime by /api/config.
+# Optional runtime envs:
+#   IMAGEFLOW_PUBLIC_BACKEND_URL=https://api.example.com
+#   IMAGEFLOW_BACKEND_PORT=8686
+#   NEXT_PUBLIC_REMOTE_PATTERNS=api.example.com
 RUN npm install dotenv
 
 ENV NODE_ENV=production

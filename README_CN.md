@@ -204,12 +204,13 @@ docker-compose -f docker-compose.build.yaml up --build -d
 | `WORKER_POOL_SIZE` | 否 | `4` | 并发图片处理工作数 |
 | `SPEED` | 否 | `5` | 编码速度（0=最慢/最佳，8=最快） |
 
-### 前端配置
+### 前端运行时配置
 
 | 变量 | 必需 | 默认值 | 描述 |
 |------|------|--------|------|
-| `NEXT_PUBLIC_API_URL` | 否 | - | 前端使用的后端 API URL |
-| `NEXT_PUBLIC_REMOTE_PATTERNS` | 否 | - | 允许的图片域名（逗号分隔） |
+| `IMAGEFLOW_BACKEND_PORT` | 否 | `8686` | 自动按当前访问主机推导后端地址时使用的公开后端端口 |
+| `IMAGEFLOW_PUBLIC_BACKEND_URL` | 否 | - | 反向代理/域名部署时显式指定公开后端 URL；留空则自动使用 `当前主机:8686` |
+| `NEXT_PUBLIC_REMOTE_PATTERNS` | 否 | - | 可选的 Next.js 图片域名配置 |
 
 ### 配置示例
 
@@ -230,9 +231,12 @@ WORKER_THREADS=4
 WORKER_POOL_SIZE=4
 MAX_UPLOAD_COUNT=20
 
-# 前端配置
-NEXT_PUBLIC_API_URL=http://backend:8686
-NEXT_PUBLIC_REMOTE_PATTERNS=http://backend:8686,https://s3.url
+# 前端运行时配置
+# 留空 IMAGEFLOW_PUBLIC_BACKEND_URL 时，前端会自动按当前访问主机推导后端地址。
+# 使用公网反代/域名时再显式设置。
+IMAGEFLOW_BACKEND_PORT=8686
+IMAGEFLOW_PUBLIC_BACKEND_URL=
+NEXT_PUBLIC_REMOTE_PATTERNS=
 ```
 
 ## API 参考
@@ -393,7 +397,7 @@ static/images/
 
 ImageFlow provides a separate external OpenAPI layer under `/openapi/*` when `AKSK_ENABLED=true`.
 
-- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer <API_KEY>`.
+- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer ***
 - External OpenAPI requests use AK/SK HMAC headers: `X-Access-Key`, `X-Signature`, `X-Timestamp`.
 - AK/SK credentials are managed through Bearer-token-protected admin APIs under `/api/admin/aksk/*` and the `/manage` frontend AK/SK tab.
 - Swagger UI is available at `/openapi/docs` when enabled.
