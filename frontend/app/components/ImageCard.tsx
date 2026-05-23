@@ -64,6 +64,10 @@ export default function ImageCard({
     setIsLoading(false);
   }, []);
 
+  const handleImageError = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
   // 根据方向确定高度类和比例
   const getHeightAndAspectRatio = (orientation: string) => {
     switch (orientation.toLowerCase()) {
@@ -245,6 +249,7 @@ export default function ImageCard({
               src={getFullUrl(image.url)}
               alt={image.filename}
               onLoad={handleImageLoad}
+              onError={handleImageError}
               className={`w-full h-full object-cover transition-all duration-500 ${
                 isLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
               }`}
@@ -256,7 +261,9 @@ export default function ImageCard({
               alt={image.filename}
               fill
               loading="lazy"
+              unoptimized
               onLoad={handleImageLoad}
+              onError={handleImageError}
               className={`object-cover w-full h-full transition-all duration-500 ${
                 isLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
               }`}

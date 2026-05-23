@@ -125,6 +125,7 @@ export const ImagePreview = ({
         src={imageUrl}
         alt={image.filename}
         fill
+        unoptimized
         className={`object-contain transition-opacity duration-300 ${
           isLoading ? "opacity-0" : "opacity-100"
         }`}

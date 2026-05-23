@@ -25,6 +25,7 @@ export function ImagePreview({ image }: ImagePreviewProps) {
           src={originalUrl}
           alt={image.filename}
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, 400px"
           className="object-contain"
         />
