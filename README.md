@@ -397,7 +397,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ImageFlow provides a separate external OpenAPI layer under `/openapi/*` when `AKSK_ENABLED=true`.
 
-- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer ***
+- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer <internal-api-key>`.
 - External OpenAPI requests use AK/SK HMAC headers: `X-Access-Key`, `X-Signature`, `X-Timestamp`.
 - AK/SK credentials are managed through Bearer-token-protected admin APIs under `/api/admin/aksk/*` and the `/manage` frontend AK/SK tab.
 - Swagger UI is available at `/openapi/docs` when enabled.
@@ -411,9 +411,9 @@ Signature string format:
 
 ```text
 METHOD
-PATH
+PATH_WITHOUT_QUERY
 UNIX_TIMESTAMP
 SHA256(BODY)
 ```
 
-Then compute `HMAC-SHA256(secret_key, string_to_sign)` and send it as `X-Signature`.
+`PATH_WITHOUT_QUERY` is the URL path only, for example `/openapi/images`; query strings such as `?page=1&limit=3` are not included in the signature. Then compute `HMAC-SHA256(secret_key, string_to_sign)` and send it as `X-Signature`.

@@ -193,6 +193,6 @@ Images are organized in a specific directory structure for orientation and forma
 - External script-facing APIs live under `/openapi/*` and are enabled with `AKSK_ENABLED=true`.
 - Existing `/api/*` endpoints remain internal WebUI APIs protected by Bearer Token (`API_KEY`) and should not be mixed with AK/SK auth.
 - AK/SK credentials are stored in Redis under `imageflow:aksk:{ak}` with SK encrypted using AES-GCM; the encryption key is derived from `API_KEY`.
-- OpenAPI request signature format: `METHOD + "\n" + PATH + "\n" + X-Timestamp + "\n" + SHA256(body)`, signed with HMAC-SHA256 using SK.
+- OpenAPI request signature format: `METHOD + "\n" + PATH_WITHOUT_QUERY + "\n" + X-Timestamp + "\n" + SHA256(body)`, signed with HMAC-SHA256 using SK. Query strings are not included in the signature.
 - Swagger docs are generated via `swaggo/swag`: `$(go env GOPATH)/bin/swag init -g main.go -o docs` and served at `/openapi/docs`.
 - Frontend `/manage` includes an AK/SK management tab for basic CRUD/disable/rotate operations.

@@ -7,7 +7,7 @@ TBD - created by archiving change openapi-aksk. Update Purpose after archive.
 The system SHALL authenticate OpenAPI requests using Access Key / Secret Key with HMAC-SHA256 signature verification.
 
 #### Scenario: Valid AK/SK request
-- **WHEN** a request includes headers `X-Access-Key`, `X-Signature`, `X-Timestamp` and the signature matches `HMAC-SHA256(SK, Method + Path + Timestamp + SHA256(Body))`
+- **WHEN** a request includes headers `X-Access-Key`, `X-Signature`, `X-Timestamp` and the signature matches `HMAC-SHA256(SK, Method + PathWithoutQuery + Timestamp + SHA256(Body))`
 - **THEN** the request is authenticated and proceeds to permission checking
 
 #### Scenario: Invalid signature

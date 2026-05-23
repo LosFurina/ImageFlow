@@ -1,8 +1,4 @@
-## Purpose
-
-Ensure the ImageFlow project operates as a fully independent repository under the LosFurina GitHub namespace, with no residual dependencies on the original upstream.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: independent-module-path
 The Go module SHALL use `github.com/LosFurina/ImageFlow` as its canonical import path, and all Go source files SHALL import from this path exclusively.

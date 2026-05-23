@@ -395,25 +395,25 @@ static/images/
 
 ## OpenAPI + AK/SK
 
-ImageFlow provides a separate external OpenAPI layer under `/openapi/*` when `AKSK_ENABLED=true`.
+启用 `AKSK_ENABLED=true` 后，ImageFlow 会在 `/openapi/*` 下提供独立的外部 OpenAPI 层。
 
-- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer ***
-- External OpenAPI requests use AK/SK HMAC headers: `X-Access-Key`, `X-Signature`, `X-Timestamp`.
-- AK/SK credentials are managed through Bearer-token-protected admin APIs under `/api/admin/aksk/*` and the `/manage` frontend AK/SK tab.
-- Swagger UI is available at `/openapi/docs` when enabled.
-- Generate Swagger docs after handler annotation changes:
+- 内部 WebUI API 保持在 `/api/*`，继续使用 `Authorization: Bearer <internal-api-key>`。
+- 外部 OpenAPI 请求使用 AK/SK HMAC Header：`X-Access-Key`、`X-Signature`、`X-Timestamp`。
+- AK/SK 通过受 Bearer Token 保护的 `/api/admin/aksk/*` 管理接口和 `/manage` 前端 AK/SK Tab 管理。
+- 启用后 Swagger UI 可通过 `/openapi/docs` 访问。
+- Handler 注解变更后重新生成 Swagger 文档：
 
 ```bash
 $(go env GOPATH)/bin/swag init -g main.go -o docs
 ```
 
-Signature string format:
+签名字符串格式：
 
 ```text
 METHOD
-PATH
+PATH_WITHOUT_QUERY
 UNIX_TIMESTAMP
 SHA256(BODY)
 ```
 
-Then compute `HMAC-SHA256(secret_key, string_to_sign)` and send it as `X-Signature`.
+`PATH_WITHOUT_QUERY` 只包含 URL path，例如 `/openapi/images`；`?page=1&limit=3` 这类 query string 不参与签名。然后计算 `HMAC-SHA256(secret_key, string_to_sign)`，并作为 `X-Signature` 发送。

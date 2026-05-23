@@ -47,8 +47,18 @@ type PaginatedResponse struct {
 	Total      int         `json:"total"`      // Total number of images
 }
 
-// ListImagesHandler returns a handler for listing images
+// ListImagesHandler returns a handler for listing images with internal Bearer API key auth.
 func ListImagesHandler(cfg *config.Config) http.HandlerFunc {
+	return listImagesHandler(cfg, true)
+}
+
+// PublicListImagesHandler returns a handler for listing images after upstream auth has already passed.
+// It is used by /openapi/images so AK/SK and Bearer auth are not stacked together.
+func PublicListImagesHandler(cfg *config.Config) http.HandlerFunc {
+	return listImagesHandler(cfg, false)
+}
+
+func listImagesHandler(cfg *config.Config, requireAPIKey bool) http.HandlerFunc {
 	// Set global config for debug logging
 	SetConfig(cfg)
 
@@ -64,8 +74,8 @@ func ListImagesHandler(cfg *config.Config) http.HandlerFunc {
 			}
 		}()
 
-		// Validate API key
-		if !validateAPIKey(w, r, cfg.APIKey) {
+		// Validate API key for internal /api/images. /openapi/images is authenticated by AK/SK middleware.
+		if requireAPIKey && !validateAPIKey(w, r, cfg.APIKey) {
 			return
 		}
 

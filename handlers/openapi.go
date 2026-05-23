@@ -59,7 +59,7 @@ func OpenAPIUploadHandler(rdb *redis.Client, cfg *config.Config) http.HandlerFun
 // @Failure 403 {object} errors.ErrorResponse
 // @Router /openapi/images [get]
 func OpenAPIListImagesHandler(rdb *redis.Client, cfg *config.Config) http.HandlerFunc {
-	return auth.AKSKAuthMiddleware(rdb, auth.PermissionImages, ListImagesHandler(cfg))
+	return auth.AKSKAuthMiddleware(rdb, auth.PermissionImages, PublicListImagesHandler(cfg))
 }
 
 // OpenAPIDeleteImageHandler godoc
