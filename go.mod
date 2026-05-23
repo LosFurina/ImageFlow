@@ -1,4 +1,4 @@
-module github.com/Yuri-NagaSaki/ImageFlow
+module github.com/LosFurina/ImageFlow
 
 go 1.23.0
 

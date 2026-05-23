@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"go.uber.org/zap"
 )
 

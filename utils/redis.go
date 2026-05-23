@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )

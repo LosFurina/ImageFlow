@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"

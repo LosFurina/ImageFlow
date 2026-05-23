@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/h2non/bimg"
 	"go.uber.org/zap"
 )

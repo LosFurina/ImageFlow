@@ -4,17 +4,16 @@
 
 <img src="favicon/favicon.svg" alt="ImageFlow Logo" width="120" height="120">
 
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/soyorins/imageflow-backend)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/losfurina/imageflow-backend)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Yuri-NagaSaki/ImageFlow)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/LosFurina/ImageFlow)
 
 **A modern image management and distribution platform with automatic format optimization**
 
 [English](README.md) | [中文文档](README_CN.md)
 
-> **Looking for a Serverless version?** Check out [CattoPic](https://github.com/Yuri-NagaSaki/CattoPic) - ImageFlow's serverless implementation for Cloudflare Workers.
 
 </div>
 
@@ -130,7 +129,7 @@ graph TB
 
 ```bash
 # Clone the repository
-git clone https://github.com/Yuri-NagaSaki/ImageFlow.git
+git clone https://github.com/LosFurina/ImageFlow.git
 cd ImageFlow
 
 # Create configuration file
@@ -386,5 +385,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Support
 
-- [Report Issues](https://github.com/Yuri-NagaSaki/ImageFlow/issues)
-- [Discussions](https://github.com/Yuri-NagaSaki/ImageFlow/discussions)
+- [Report Issues](https://github.com/LosFurina/ImageFlow/issues)
+- [Discussions](https://github.com/LosFurina/ImageFlow/discussions)

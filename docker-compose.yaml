@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: soyorins/imageflow-backend:latest
+    image: losfurina/imageflow-backend:latest
     container_name: imageflow-backend
     ports:
       - "8686:8686"
@@ -43,7 +43,7 @@ services:
     networks:
       - imageflow-network
   frontend:
-    image: soyorins/imageflow-frontend:latest
+    image: losfurina/imageflow-frontend:latest
     container_name: imageflow-frontend
     ports:
       - "3000:3000"

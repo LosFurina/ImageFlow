@@ -4,17 +4,16 @@
 
 <img src="favicon/favicon.svg" alt="ImageFlow Logo" width="120" height="120">
 
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/soyorins/imageflow-backend)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/losfurina/imageflow-backend)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Yuri-NagaSaki/ImageFlow)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/LosFurina/ImageFlow)
 
 **现代化图片管理与分发平台，支持自动格式优化**
 
 [English](README.md) | [中文文档](README_CN.md)
 
-> **需要 Serverless 版本？** 查看 [CattoPic](https://github.com/Yuri-NagaSaki/CattoPic) - ImageFlow 的 Cloudflare Workers 无服务器实现。
 
 </div>
 
@@ -130,7 +129,7 @@ graph TB
 
 ```bash
 # 克隆仓库
-git clone https://github.com/Yuri-NagaSaki/ImageFlow.git
+git clone https://github.com/LosFurina/ImageFlow.git
 cd ImageFlow
 
 # 创建配置文件
@@ -386,5 +385,5 @@ static/images/
 
 ## 支持
 
-- [报告问题](https://github.com/Yuri-NagaSaki/ImageFlow/issues)
-- [讨论](https://github.com/Yuri-NagaSaki/ImageFlow/discussions)
+- [报告问题](https://github.com/LosFurina/ImageFlow/issues)
+- [讨论](https://github.com/LosFurina/ImageFlow/discussions)

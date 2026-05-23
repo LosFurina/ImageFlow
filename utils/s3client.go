@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"

@@ -12,10 +12,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/handlers"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/handlers"
+	"github.com/LosFurina/ImageFlow/utils"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )

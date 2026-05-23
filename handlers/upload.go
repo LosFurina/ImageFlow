@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Yuri-NagaSaki/ImageFlow/config"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/errors"
-	"github.com/Yuri-NagaSaki/ImageFlow/utils/logger"
+	"github.com/LosFurina/ImageFlow/config"
+	"github.com/LosFurina/ImageFlow/utils"
+	"github.com/LosFurina/ImageFlow/utils/errors"
+	"github.com/LosFurina/ImageFlow/utils/logger"
 	"go.uber.org/zap"
 )
 
