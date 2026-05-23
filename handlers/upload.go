@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	_ "golang.org/x/image/webp"
-	_ "github.com/gen2brain/avif"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
@@ -21,11 +21,14 @@ import (
 	"github.com/LosFurina/ImageFlow/utils"
 	"github.com/LosFurina/ImageFlow/utils/errors"
 	"github.com/LosFurina/ImageFlow/utils/logger"
+	_ "github.com/gen2brain/avif"
 	"go.uber.org/zap"
+	_ "golang.org/x/image/webp"
 )
 
 // UploadResult represents the result of an image upload
 type UploadResult struct {
+	ID          string            `json:"id"`
 	Filename    string            `json:"filename"`
 	Status      string            `json:"status"`
 	Message     string            `json:"message"`
@@ -34,6 +37,22 @@ type UploadResult struct {
 	URLs        map[string]string `json:"urls,omitempty"`
 	ExpiryTime  string            `json:"expiryTime,omitempty"`
 	Tags        []string          `json:"tags,omitempty"`
+}
+
+// UploadResponse represents the response for one upload request.
+type UploadResponse struct {
+	Results []UploadResult `json:"results"`
+}
+
+// generateImageID returns a timestamp-prefixed random ID for image files.
+// The 128-bit random suffix makes collisions practically impossible across
+// concurrent uploads and multiple backend instances.
+func generateImageID() (string, error) {
+	randomBytes := make([]byte, 16)
+	if _, err := rand.Read(randomBytes); err != nil {
+		return "", fmt.Errorf("failed to generate random image ID: %w", err)
+	}
+	return fmt.Sprintf("%s_%s", time.Now().UTC().Format("20060102_150405"), hex.EncodeToString(randomBytes)), nil
 }
 
 // getPublicURL constructs a public-facing URL for accessing an image
@@ -104,10 +123,16 @@ func processImage(ctx *uploadContext, fileHeader *multipart.FileHeader) UploadRe
 		}
 	}
 
-	// Generate unique filename
-	timestamp := time.Now().Format("20060102_150405")
-	filename := fmt.Sprintf("%s_%d", timestamp, time.Now().UnixNano()%10000)
-	imageID := filename
+	// Generate a collision-resistant image ID and use it as the stored filename.
+	imageID, err := generateImageID()
+	if err != nil {
+		return UploadResult{
+			Filename: fileHeader.Filename,
+			Status:   "error",
+			Message:  fmt.Sprintf("Error generating image ID: %v", err),
+		}
+	}
+	filename := imageID
 
 	// Detect image format
 	imgFormat, err := utils.DetectImageFormat(data)
@@ -287,6 +312,7 @@ func processImage(ctx *uploadContext, fileHeader *multipart.FileHeader) UploadRe
 	}
 
 	return UploadResult{
+		ID:          imageID,
 		Filename:    fileHeader.Filename,
 		Status:      "success",
 		Message:     "File uploaded and converted successfully",
@@ -408,8 +434,8 @@ func UploadHandler(cfg *config.Config) http.HandlerFunc {
 		// Return JSON response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"results": results,
+		if err := json.NewEncoder(w).Encode(UploadResponse{
+			Results: results,
 		}); err != nil {
 			logger.Error("编码响应失败", zap.Error(err))
 			errors.HandleError(w, errors.ErrInternal, "服务器内部错误", nil)

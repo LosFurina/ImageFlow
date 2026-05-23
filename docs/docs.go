@@ -528,7 +528,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Expiration in minutes",
-                        "name": "expiry",
+                        "name": "expiryMinutes",
                         "in": "formData"
                     }
                 ],
@@ -536,8 +536,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/handlers.UploadResponse"
                         }
                     },
                     "400": {
@@ -664,6 +663,55 @@ const docTemplate = `{
                 "message": {
                     "description": "Error message",
                     "type": "string"
+                }
+            }
+        },
+        "handlers.UploadResponse": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.UploadResult"
+                    }
+                }
+            }
+        },
+        "handlers.UploadResult": {
+            "type": "object",
+            "properties": {
+                "expiryTime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "format": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "orientation": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "urls": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }

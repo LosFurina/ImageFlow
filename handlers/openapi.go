@@ -33,8 +33,8 @@ func RegisterOpenAPIRoutes(rdb *redis.Client, cfg *config.Config) {
 // @Param X-Timestamp header string true "Unix timestamp"
 // @Param images formData file true "Image files"
 // @Param tags formData string false "Comma-separated tags"
-// @Param expiry formData int false "Expiration in minutes"
-// @Success 200 {object} map[string]interface{}
+// @Param expiryMinutes formData int false "Expiration in minutes"
+// @Success 200 {object} UploadResponse
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 403 {object} errors.ErrorResponse

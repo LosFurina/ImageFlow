@@ -140,16 +140,15 @@ export default function Home() {
       setUploadProgress(100)
 
       const resultsWithIds = result.results.map(item => {
-        // Extract the real image ID from the original URL if available
-        let imageId = Math.random().toString(36).substring(2) // Default to random ID
-        let path = item.urls?.original || ''
+        const path = item.urls?.original || ''
+        let imageId = item.id || Math.random().toString(36).substring(2)
 
-        if (item.urls?.original) {
-          // Extract file ID from the original URL
+        // Backward-compatible fallback for older backend responses without id.
+        if (!item.id && item.urls?.original) {
           const urlParts = item.urls.original.split('/')
           const filename = urlParts[urlParts.length - 1]
           if (filename.includes('.')) {
-            imageId = filename.split('.')[0] // Remove file extension to get ID
+            imageId = filename.split('.')[0]
           }
         }
 
@@ -196,19 +195,12 @@ export default function Home() {
   const handleDeleteImage = async (id: string) => {
     try {
       const image = uploadResults.find((img) => img.id === id);
-      if (!image || !image.urls?.original) return;
-
-      // Extract the real image ID from the original URL
-      // The original URL would be like: /images/original/landscape/filename.jpg
-      // or /images/original/portrait/filename.jpg
-      const urlParts = image.urls.original.split('/');
-      const filename = urlParts[urlParts.length - 1];
-      const fileId = filename.split('.')[0]; // Remove file extension to get the real ID
+      if (!image?.id) return;
 
       const response = await api.post<{ success: boolean; message: string }>(
         "/api/delete-image",
         {
-          id: fileId
+          id: image.id
         }
       );
 

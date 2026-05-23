@@ -85,6 +85,38 @@ definitions:
         description: Error message
         type: string
     type: object
+  handlers.UploadResponse:
+    properties:
+      results:
+        items:
+          $ref: '#/definitions/handlers.UploadResult'
+        type: array
+    type: object
+  handlers.UploadResult:
+    properties:
+      expiryTime:
+        type: string
+      filename:
+        type: string
+      format:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      orientation:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      urls:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
 info:
   contact: {}
   description: ImageFlow public OpenAPI protected by AK/SK HMAC authentication.
@@ -435,7 +467,7 @@ paths:
         type: string
       - description: Expiration in minutes
         in: formData
-        name: expiry
+        name: expiryMinutes
         type: integer
       produces:
       - application/json
@@ -443,8 +475,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/handlers.UploadResponse'
         "400":
           description: Bad Request
           schema:
