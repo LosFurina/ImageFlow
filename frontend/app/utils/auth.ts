@@ -1,5 +1,6 @@
+import { resolveApiUrl } from "./apiBase";
+
 const API_KEY_KEY = "imageflow_api_key";
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 export const getApiKey = (): string | null => {
   if (typeof window !== "undefined") {
     return localStorage.getItem(API_KEY_KEY);
@@ -21,7 +22,7 @@ export const removeApiKey = (): void => {
 
 export const validateApiKey = async (apiKey: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${BASE_URL}/api/validate-api-key`, {
+    const response = await fetch(resolveApiUrl("/api/validate-api-key").toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

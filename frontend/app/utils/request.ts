@@ -1,4 +1,5 @@
 import { getApiKey } from "./auth";
+import { resolveApiUrl, setRuntimeApiBaseUrl } from "./apiBase";
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
@@ -9,7 +10,6 @@ interface ConfigResponse {
   remotePatterns: string;
 }
 
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 let hasInitialized = false;
 
 async function initializeBaseUrl() {
@@ -17,7 +17,7 @@ async function initializeBaseUrl() {
     const response = await fetch("/api/config");
     const config: ConfigResponse = await response.json();
     if (config.apiUrl) {
-      BASE_URL = config.apiUrl;
+      setRuntimeApiBaseUrl(config.apiUrl);
     }
   } catch (error) {
     console.error("Failed to fetch API config:", error);
@@ -38,8 +38,8 @@ export async function request<T>(
   const { params, ...restOptions } = options;
 
   // 构建URL
-  const url: URL = new URL(endpoint, BASE_URL || window.location.origin);
-  console.log(BASE_URL, url.toString());
+  const url: URL = resolveApiUrl(endpoint);
+  console.log(url.toString());
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.append(key, value);
