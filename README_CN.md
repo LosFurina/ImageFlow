@@ -276,7 +276,7 @@ curl "http://localhost:8686/api/random?orientation=portrait&format=webp"
 所有管理端点需要 `Authorization` 请求头：
 
 ```
-Authorization: Bearer your-api-key
+Authorization: Bearer ***
 ```
 
 #### 上传图片
@@ -387,3 +387,29 @@ static/images/
 
 - [报告问题](https://github.com/LosFurina/ImageFlow/issues)
 - [讨论](https://github.com/LosFurina/ImageFlow/discussions)
+
+
+## OpenAPI + AK/SK
+
+ImageFlow provides a separate external OpenAPI layer under `/openapi/*` when `AKSK_ENABLED=true`.
+
+- Internal WebUI APIs remain under `/api/*` and continue to use `Authorization: Bearer <API_KEY>`.
+- External OpenAPI requests use AK/SK HMAC headers: `X-Access-Key`, `X-Signature`, `X-Timestamp`.
+- AK/SK credentials are managed through Bearer-token-protected admin APIs under `/api/admin/aksk/*` and the `/manage` frontend AK/SK tab.
+- Swagger UI is available at `/openapi/docs` when enabled.
+- Generate Swagger docs after handler annotation changes:
+
+```bash
+$(go env GOPATH)/bin/swag init -g main.go -o docs
+```
+
+Signature string format:
+
+```text
+METHOD
+PATH
+UNIX_TIMESTAMP
+SHA256(BODY)
+```
+
+Then compute `HMAC-SHA256(secret_key, string_to_sign)` and send it as `X-Signature`.

@@ -22,6 +22,10 @@ const (
 	ErrImageDelete  ErrorCode = 2002 // Image deletion error
 	ErrImageList    ErrorCode = 2003 // Image list retrieval error
 	ErrMetadata     ErrorCode = 2004 // Metadata operation error
+
+	ErrInvalidAKSK  ErrorCode = 3001 // Invalid AK/SK credentials
+	ErrAKSKDisabled ErrorCode = 3002 // AK/SK is disabled
+	ErrPermDenied   ErrorCode = 3003 // Permission denied for AK/SK
 )
 
 type ErrorResponse struct {
@@ -40,6 +44,12 @@ func (code ErrorCode) HTTPError() int {
 		return http.StatusForbidden
 	case ErrNotFound:
 		return http.StatusNotFound
+	case ErrInvalidAKSK:
+		return http.StatusUnauthorized
+	case ErrAKSKDisabled:
+		return http.StatusForbidden
+	case ErrPermDenied:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}
@@ -67,7 +77,7 @@ func WriteError(w http.ResponseWriter, err *ErrorResponse) {
 		logger.Error("Internal server error occurred", logFields...)
 	case ErrInvalidParam:
 		logger.Warn("Invalid parameter error", logFields...)
-	case ErrUnauthorized, ErrForbidden, ErrNotFound:
+	case ErrUnauthorized, ErrForbidden, ErrNotFound, ErrInvalidAKSK, ErrAKSKDisabled, ErrPermDenied:
 		logger.Info("Access control error", logFields...)
 	default:
 		logger.Error("Unknown error occurred", logFields...)
@@ -84,7 +94,10 @@ func HandleError(w http.ResponseWriter, code ErrorCode, message string, details 
 }
 
 var (
-	ErrInvalidAPIKey = NewError(ErrUnauthorized, "Invalid API key", nil)
-	ErrNoPermission  = NewError(ErrForbidden, "No permission to access", nil)
-	ErrServerError   = NewError(ErrInternal, "Internal server error", nil)
+	ErrInvalidAPIKey       = NewError(ErrUnauthorized, "Invalid API key", nil)
+	ErrNoPermission        = NewError(ErrForbidden, "No permission to access", nil)
+	ErrServerError         = NewError(ErrInternal, "Internal server error", nil)
+	ErrAKSKInvalidCreds    = NewError(ErrInvalidAKSK, "Invalid AK/SK credentials", nil)
+	ErrAKSKAccountDisabled = NewError(ErrAKSKDisabled, "AK/SK is disabled", nil)
+	ErrAKSKPermDenied      = NewError(ErrPermDenied, "Permission denied", nil)
 )

@@ -12,11 +12,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/LosFurina/ImageFlow/auth"
 	"github.com/LosFurina/ImageFlow/config"
+	_ "github.com/LosFurina/ImageFlow/docs"
 	"github.com/LosFurina/ImageFlow/handlers"
 	"github.com/LosFurina/ImageFlow/utils"
 	"github.com/LosFurina/ImageFlow/utils/logger"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 )
 
@@ -72,6 +75,19 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// @title ImageFlow OpenAPI
+// @version 1.0
+// @description ImageFlow public OpenAPI protected by AK/SK HMAC authentication.
+// @BasePath /
+// @securityDefinitions.apikey AkSkAccessKey
+// @in header
+// @name X-Access-Key
+// @securityDefinitions.apikey AkSkSignature
+// @in header
+// @name X-Signature
+// @securityDefinitions.apikey AkSkTimestamp
+// @in header
+// @name X-Timestamp
 func main() {
 	if err := logger.InitBasicLogger(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to initialize basic logger: %v\n", err)
@@ -149,6 +165,28 @@ func main() {
 			"message": "Cleanup process triggered",
 		})
 	}))
+
+	// Register OpenAPI routes with AK/SK authentication (if enabled)
+	if cfg.AKSKEnabled {
+		// Swagger UI for OpenAPI documentation
+		http.HandleFunc("/openapi/docs", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/openapi/docs/index.html", http.StatusFound)
+		})
+		http.HandleFunc("/openapi/docs/", httpSwagger.WrapHandler)
+
+		// Initialize SK encryption with the API key
+		auth.InitSKEncryption(cfg.APIKey)
+
+		// Get Redis client for AK/SK storage
+		rdb := utils.RedisClient
+		if rdb != nil {
+			handlers.RegisterOpenAPIRoutes(rdb, cfg)
+			handlers.RegisterAKSKAdminRoutes(rdb, cfg)
+			logger.Info("OpenAPI with AK/SK authentication enabled")
+		} else {
+			logger.Warn("AKSK_ENABLED but Redis client not available, OpenAPI routes not registered")
+		}
+	}
 
 	// Use appropriate random image handler based on storage type
 	if cfg.StorageType == config.StorageTypeS3 {

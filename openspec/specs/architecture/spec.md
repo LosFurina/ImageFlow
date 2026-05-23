@@ -56,7 +56,7 @@ The system SHALL manage image metadata with Redis as primary store and file-base
 The system SHALL authenticate upload, delete, and management endpoints using API key via Bearer token with constant-time comparison.
 
 #### Scenario: Valid API key
-- **WHEN** a request includes `Authorization: Bearer <valid-key>`
+- **WHEN** a request includes `Authorization: Bearer ***
 - **THEN** the request is processed normally
 
 #### Scenario: Invalid API key
@@ -80,3 +80,29 @@ The frontend SHALL provide a Next.js SPA with drag-and-drop upload, tag selectio
 #### Scenario: Image management page
 - **WHEN** a user navigates to `/manage`
 - **THEN** the system displays a paginated masonry grid of all images with filtering by format, orientation, and tags, and supports deletion with confirmation
+
+
+### Requirement: openapi-aksk-access
+The system SHALL expose external script-facing OpenAPI endpoints under `/openapi/*` protected by AK/SK HMAC authentication while leaving existing `/api/*` Bearer Token internal APIs unchanged.
+
+#### Scenario: External script uses AK/SK
+- **WHEN** a script calls `/openapi/upload` with valid `X-Access-Key`, `X-Signature`, and `X-Timestamp` headers
+- **THEN** the system validates the HMAC signature, checks the required permission, and processes the request
+
+#### Scenario: Internal API remains isolated
+- **WHEN** WebUI calls `/api/*` endpoints
+- **THEN** the system continues to use the existing Bearer Token API key flow without requiring AK/SK headers
+
+### Requirement: aksk-management-ui
+The system SHALL provide basic AK/SK lifecycle management in the frontend `/manage` page for creating, disabling, rotating, and deleting external API credentials.
+
+#### Scenario: Create credential from UI
+- **WHEN** an authenticated admin creates an AK/SK credential in `/manage`
+- **THEN** the system returns the Secret Key exactly once and lists the Access Key with role and enabled status
+
+### Requirement: swagger-documentation
+The system SHALL generate Swagger documentation from Go annotations and serve it at `/openapi/docs` when AK/SK OpenAPI is enabled.
+
+#### Scenario: Swagger UI access
+- **WHEN** a user opens `/openapi/docs`
+- **THEN** the system serves an interactive Swagger UI containing all `/openapi/*` endpoints

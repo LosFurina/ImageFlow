@@ -1,0 +1,476 @@
+basePath: /
+definitions:
+  config.ClientConfig:
+    properties:
+      avifSupport:
+        description: Whether AVIF format is supported
+        type: boolean
+      imageQuality:
+        description: Image conversion quality (1-100)
+        type: integer
+      maxUploadCount:
+        description: Maximum number of images allowed per upload
+        type: integer
+      speed:
+        description: Encoding speed (0-8, 0=slowest/highest quality)
+        type: integer
+    type: object
+  errors.ErrorCode:
+    enum:
+    - 1000
+    - 1001
+    - 1002
+    - 1003
+    - 1004
+    - 2000
+    - 2001
+    - 2002
+    - 2003
+    - 2004
+    - 3001
+    - 3002
+    - 3003
+    type: integer
+    x-enum-comments:
+      ErrAKSKDisabled: AK/SK is disabled
+      ErrForbidden: Forbidden
+      ErrImageDelete: Image deletion error
+      ErrImageList: Image list retrieval error
+      ErrImageProcess: Image processing error
+      ErrImageUpload: Image upload error
+      ErrInternal: Internal server error
+      ErrInvalidAKSK: Invalid AK/SK credentials
+      ErrInvalidParam: Invalid parameter
+      ErrMetadata: Metadata operation error
+      ErrNotFound: Resource not found
+      ErrPermDenied: Permission denied for AK/SK
+      ErrUnauthorized: Unauthorized
+    x-enum-descriptions:
+    - Internal server error
+    - Invalid parameter
+    - Unauthorized
+    - Forbidden
+    - Resource not found
+    - Image processing error
+    - Image upload error
+    - Image deletion error
+    - Image list retrieval error
+    - Metadata operation error
+    - Invalid AK/SK credentials
+    - AK/SK is disabled
+    - Permission denied for AK/SK
+    x-enum-varnames:
+    - ErrInternal
+    - ErrInvalidParam
+    - ErrUnauthorized
+    - ErrForbidden
+    - ErrNotFound
+    - ErrImageProcess
+    - ErrImageUpload
+    - ErrImageDelete
+    - ErrImageList
+    - ErrMetadata
+    - ErrInvalidAKSK
+    - ErrAKSKDisabled
+    - ErrPermDenied
+  errors.ErrorResponse:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/errors.ErrorCode'
+        description: Error code
+      details:
+        description: Error details
+      message:
+        description: Error message
+        type: string
+    type: object
+info:
+  contact: {}
+  description: ImageFlow public OpenAPI protected by AK/SK HMAC authentication.
+  title: ImageFlow OpenAPI
+  version: "1.0"
+paths:
+  /openapi/cleanup:
+    post:
+      description: Trigger expired image cleanup. Requires api:cleanup permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Trigger cleanup
+      tags:
+      - OpenAPI
+  /openapi/config:
+    get:
+      description: Get public client configuration. Requires api:config permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/config.ClientConfig'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get client configuration
+      tags:
+      - OpenAPI
+  /openapi/debug/tags:
+    get:
+      description: Debug tag indexes. Requires api:debug permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Debug tags
+      tags:
+      - OpenAPI
+  /openapi/delete:
+    post:
+      consumes:
+      - application/json
+      description: Delete an image. Requires api:delete permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Delete request
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Delete image
+      tags:
+      - OpenAPI
+  /openapi/images:
+    get:
+      description: List uploaded images. Requires api:images permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: Filter by tag
+        in: query
+        name: tag
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: List images
+      tags:
+      - OpenAPI
+  /openapi/random:
+    get:
+      description: Get a random image with optional filters. Requires api:random permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Single tag filter
+        in: query
+        name: tag
+        type: string
+      - description: Comma-separated tag filters
+        in: query
+        name: tags
+        type: string
+      - description: Comma-separated excluded tags
+        in: query
+        name: exclude
+        type: string
+      - description: portrait or landscape
+        in: query
+        name: orientation
+        type: string
+      - description: avif, webp, or original
+        in: query
+        name: format
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get random image
+      tags:
+      - OpenAPI
+  /openapi/tags:
+    get:
+      description: List available image tags. Requires api:tags permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: List tags
+      tags:
+      - OpenAPI
+  /openapi/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload images through OpenAPI. Requires api:upload permission.
+      parameters:
+      - description: Access Key
+        in: header
+        name: X-Access-Key
+        required: true
+        type: string
+      - description: HMAC-SHA256 signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      - description: Unix timestamp
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: Image files
+        in: formData
+        name: images
+        required: true
+        type: file
+      - description: Comma-separated tags
+        in: formData
+        name: tags
+        type: string
+      - description: Expiration in minutes
+        in: formData
+        name: expiry
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Upload images
+      tags:
+      - OpenAPI
+securityDefinitions:
+  AkSkAccessKey:
+    in: header
+    name: X-Access-Key
+    type: apiKey
+  AkSkSignature:
+    in: header
+    name: X-Signature
+    type: apiKey
+  AkSkTimestamp:
+    in: header
+    name: X-Timestamp
+    type: apiKey
+swagger: "2.0"

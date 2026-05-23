@@ -70,6 +70,9 @@ type Config struct {
 	S3SecretKey      string `json:"-"`                   // S3 secret key
 	S3Enabled        bool   `json:"s3_enabled"`          // Whether S3 storage is enabled
 	S3ForcePathStyle bool   `json:"s3_force_path_style"` // Use path style S3 URLs
+
+	// OpenAPI AK/SK settings
+	AKSKEnabled bool `json:"aksk_enabled"` // Whether OpenAPI with AK/SK auth is enabled
 }
 
 // GetBaseURL returns the base URL for image access based on storage configuration
@@ -272,6 +275,11 @@ func (c *Config) loadEnvVars() {
 
 	if pathStyle := os.Getenv("S3_FORCE_PATH_STYLE"); pathStyle != "" {
 		c.S3ForcePathStyle = pathStyle == "true"
+	}
+
+	// OpenAPI AK/SK settings
+	if aksk := os.Getenv("AKSK_ENABLED"); aksk != "" {
+		c.AKSKEnabled = aksk == "true"
 	}
 }
 

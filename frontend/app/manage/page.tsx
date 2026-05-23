@@ -19,6 +19,7 @@ import {
 } from "../types";
 import Header from "../components/Header";
 import ToastContainer from "../components/ToastContainer";
+import AKSKManager from "../components/AKSKManager";
 import { ImageIcon, Spinner } from "../components/ui/icons";
 
 export default function Manage() {
@@ -38,6 +39,7 @@ export default function Manage() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isKeyVerified, setIsKeyVerified] = useState(false);
+  const [activeTab, setActiveTab] = useState<"images" | "aksk">("images");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastImageElementRef = useCallback(
@@ -222,9 +224,34 @@ export default function Manage() {
         </motion.div>
       )}
 
-      <ImageFilters onFilterChange={handleFilterChange} />
+      <div className="mb-6 flex gap-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setActiveTab("images")}
+          className={`px-4 py-2 text-sm font-medium ${
+            activeTab === "images"
+              ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-300"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          图片管理
+        </button>
+        <button
+          onClick={() => setActiveTab("aksk")}
+          className={`px-4 py-2 text-sm font-medium ${
+            activeTab === "aksk"
+              ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-300"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          AK/SK 管理
+        </button>
+      </div>
 
-      {isLoading ? (
+      {activeTab === "images" ? (
+        <>
+          <ImageFilters onFilterChange={handleFilterChange} />
+
+          {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Spinner className="h-12 w-12 text-indigo-500" />
         </div>
@@ -316,6 +343,10 @@ export default function Manage() {
             </div>
           )}
         </>
+          )}
+        </>
+      ) : (
+        <AKSKManager />
       )}
 
       <ImageModal
