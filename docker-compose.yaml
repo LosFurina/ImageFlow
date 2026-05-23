@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   backend:
-    image: losfurina/imageflow-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: losfurina/imageflow-backend:local
     container_name: imageflow-backend
     ports:
       - "8686:8686"
@@ -25,17 +28,18 @@ services:
       - WORKER_THREADS=${WORKER_THREADS:-4}
       - SPEED=${SPEED:-5}
       - METADATA_STORE_TYPE=${METADATA_STORE_TYPE:-redis}
-      - REDIS_HOST=${REDIS_HOST:-localhost}
+      - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_DB=${REDIS_DB:-0}
       - REDIS_TLS_ENABLED=${REDIS_TLS_ENABLED:-false}
-      - DEBUG_MODE=${DEBUG_MODE:-false} 
+      - AKSK_ENABLED=${AKSK_ENABLED:-true}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
     depends_on:
       - redis
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8686/api/random || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8686/openapi/docs/index.html || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -43,7 +47,13 @@ services:
     networks:
       - imageflow-network
   frontend:
-    image: losfurina/imageflow-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8686}
+        NEXT_PUBLIC_REMOTE_PATTERNS: ${NEXT_PUBLIC_REMOTE_PATTERNS:-localhost}
+    image: losfurina/imageflow-frontend:local
     container_name: imageflow-frontend
     ports:
       - "3000:3000"
@@ -51,7 +61,7 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_REMOTE_PATTERNS=${NEXT_PUBLIC_REMOTE_PATTERNS}
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3000/", "||", "exit", "1" ]
+      test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"" ]
       interval: 30s
       timeout: 10s
       retries: 3
