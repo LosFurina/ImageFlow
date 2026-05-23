@@ -1,9 +1,8 @@
+# openapi-aksk Specification
+
 ## Purpose
-
-Define the requirements for ImageFlow's OpenAPI layer with AK/SK authentication, RBAC permissions, management APIs, Swagger documentation, and frontend management interface.
-
+TBD - created by archiving change openapi-aksk. Update Purpose after archive.
 ## Requirements
-
 ### Requirement: aksk-authentication
 The system SHALL authenticate OpenAPI requests using Access Key / Secret Key with HMAC-SHA256 signature verification.
 
@@ -128,3 +127,4 @@ The system SHALL provide a frontend management interface for AK/SK in the `/mana
 #### Scenario: Manage AK/SK
 - **WHEN** a user toggles enabled/disabled or clicks delete on an AK/SK entry
 - **THEN** the system updates or removes the entry accordingly with confirmation
+
