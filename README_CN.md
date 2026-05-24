@@ -147,7 +147,7 @@ nano .env
 docker compose up -d
 
 # 或本地构建用于开发/测试
-docker compose -f docker-compose.build.yaml up --build -d
+docker compose -f docker-compose.dev.yaml up --build -d
 ```
 
 部署完成后：
@@ -521,7 +521,7 @@ ImageFlow/
 │   ├── components/        # React 组件
 │   └── utils/             # 前端工具
 ├── docker-compose.yaml       # Docker 部署（预构建镜像）
-├── docker-compose.build.yaml # Docker 部署（本地构建）
+├── docker-compose.dev.yaml    # Docker 部署（本地构建）
 ├── Dockerfile.backend        # 后端容器
 ├── Dockerfile.frontend       # 前端容器
 └── .env.example           # 配置模板

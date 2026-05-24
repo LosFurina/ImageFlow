@@ -147,7 +147,7 @@ nano .env
 docker compose up -d
 
 # Or build locally for development/testing
-docker compose -f docker-compose.build.yaml up --build -d
+docker compose -f docker-compose.dev.yaml up --build -d
 ```
 
 After deployment:
@@ -521,7 +521,7 @@ ImageFlow/
 │   ├── components/        # React components
 │   └── utils/             # Frontend utilities
 ├── docker-compose.yaml       # Docker deployment (pre-built images)
-├── docker-compose.build.yaml # Docker deployment (local build)
+├── docker-compose.dev.yaml    # Docker deployment (local build)
 ├── Dockerfile.backend        # Backend container
 ├── Dockerfile.frontend       # Frontend container
 └── .env.example           # Configuration template

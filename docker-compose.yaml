@@ -1,10 +1,8 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    image: losfurina/imageflow-backend:local
+    image: ghcr.io/losfurina/imageflow-backend:latest
     container_name: imageflow-backend
+    pull_policy: always
     ports:
       - "8686:8686"
     volumes:
@@ -44,12 +42,11 @@ services:
       start_period: 10s
     networks:
       - imageflow-network
+
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    image: losfurina/imageflow-frontend:local
+    image: ghcr.io/losfurina/imageflow-frontend:latest
     container_name: imageflow-frontend
+    pull_policy: always
     ports:
       - "3000:3000"
     environment:

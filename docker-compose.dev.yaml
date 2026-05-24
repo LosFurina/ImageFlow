@@ -1,5 +1,5 @@
-# Local build version - use this for development and testing
-# Usage: docker-compose -f docker-compose.build.yaml up --build -d
+# Local development version - builds images from source
+# Usage: docker compose -f docker-compose.dev.yaml up --build -d
 
 services:
   backend:

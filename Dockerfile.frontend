@@ -1,4 +1,4 @@
-FROM node:slim
+FROM node:slim AS builder
 
 WORKDIR /app
 
@@ -7,23 +7,20 @@ RUN npm install
 
 COPY frontend/ ./
 
-# Public backend URL is resolved at runtime by /api/config.
-# Optional runtime envs:
-#   IMAGEFLOW_PUBLIC_BACKEND_URL=https://api.example.com
-#   IMAGEFLOW_BACKEND_PORT=8686
-#   NEXT_PUBLIC_REMOTE_PATTERNS=api.example.com
-RUN npm install dotenv
-
 ENV NODE_ENV=production
+RUN npm run build
+
+# Runtime stage
+FROM node:slim
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
-COPY <<EOF /app/start.sh
-#!/bin/sh
-npm run build
-npm start
-EOF
-
-RUN chmod +x /app/start.sh
-
-CMD ["/app/start.sh"]
+CMD ["npm", "start"]

@@ -64,7 +64,7 @@ npm run lint
 docker-compose up -d
 
 # Or build locally for development/testing
-docker-compose -f docker-compose.build.yaml up --build -d
+docker-compose -f docker-compose.dev.yaml up --build -d
 ```
 
 ## Configuration
@@ -143,7 +143,7 @@ The service is configured via environment variables in `.env` file:
 │   └── package.json   # Frontend dependencies
 ├── logs/              # Application logs
 ├── docker-compose.yaml       # Docker deployment (pre-built images)
-├── docker-compose.build.yaml # Docker deployment (local build)
+├── docker-compose.dev.yaml    # Docker deployment (local build)
 ├── Dockerfile.backend        # Backend container
 └── Dockerfile.frontend       # Frontend container
 ```
