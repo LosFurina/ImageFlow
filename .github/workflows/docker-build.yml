@@ -23,7 +23,7 @@ jobs:
         include:
           - name: backend
             dockerfile: Dockerfile.backend
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64
             image: ${{ github.repository_owner }}/imageflow-backend
           - name: frontend
             dockerfile: Dockerfile.frontend
