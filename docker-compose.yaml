@@ -1,6 +1,7 @@
 services:
   backend:
     image: ghcr.io/losfurina/imageflow-backend:latest
+    platform: linux/amd64
     container_name: imageflow-backend
     pull_policy: always
     ports:
@@ -45,6 +46,7 @@ services:
 
   frontend:
     image: ghcr.io/losfurina/imageflow-frontend:latest
+    platform: linux/amd64
     container_name: imageflow-frontend
     pull_policy: always
     ports:
