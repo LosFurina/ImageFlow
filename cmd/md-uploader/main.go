@@ -198,6 +198,29 @@ func FindLocalImages(mdContent string, mdDir string, vaultRoot string) map[strin
 	return result
 }
 
+// moveToAssets moves the original image file to vaultRoot/assets/<articleName>/
+func moveToAssets(absPath string, vaultRoot string, articleName string) (string, error) {
+	targetDir := filepath.Join(vaultRoot, "assets", articleName)
+	if err := os.MkdirAll(targetDir, 0755); err != nil {
+		return "", fmt.Errorf("create assets dir: %w", err)
+	}
+
+	baseName := filepath.Base(absPath)
+	targetPath := filepath.Join(targetDir, baseName)
+
+	// Handle duplicate filenames
+	if _, err := os.Stat(targetPath); err == nil {
+		ext := filepath.Ext(baseName)
+		name := strings.TrimSuffix(baseName, ext)
+		targetPath = filepath.Join(targetDir, fmt.Sprintf("%s_%d%s", name, time.Now().Unix(), ext))
+	}
+
+	if err := os.Rename(absPath, targetPath); err != nil {
+		return "", fmt.Errorf("move file: %w", err)
+	}
+	return targetPath, nil
+}
+
 func main() {
 	var (
 		endpoint = flag.String("endpoint", defaultEndpoint, "ImageFlow server endpoint")
@@ -252,6 +275,9 @@ func main() {
 		vaultRoot = mdDir
 	}
 
+	// Article name (without .md extension) for asset organization
+	articleName := strings.TrimSuffix(filepath.Base(mdPath), filepath.Ext(mdPath))
+
 	content, err := os.ReadFile(mdPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
@@ -274,6 +300,7 @@ func main() {
 
 	// Upload each image and collect replacements
 	replacements := make(map[string]string) // rawRef -> new markdown
+	movedFiles := make(map[string]bool)     // dedup: track already-moved files
 	for _, ref := range images {
 		fmt.Fprintf(os.Stderr, "Uploading %s ... ", filepath.Base(ref.absPath))
 		url, err := UploadImage(*endpoint, ak, sk, ref.absPath)
@@ -286,6 +313,17 @@ func main() {
 		// Build replacement markdown
 		newRef := fmt.Sprintf("![%s](%s)", ref.altText, url)
 		replacements[ref.rawRef] = newRef
+
+		// Move original file to assets/<articleName>/
+		if !movedFiles[ref.absPath] {
+			newPath, err := moveToAssets(ref.absPath, vaultRoot, articleName)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "  WARN: failed to move original file: %v\n", err)
+			} else {
+				fmt.Fprintf(os.Stderr, "  Moved original to %s\n", newPath)
+				movedFiles[ref.absPath] = true
+			}
+		}
 	}
 
 	if len(replacements) == 0 {
