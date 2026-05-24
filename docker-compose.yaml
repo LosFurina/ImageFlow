@@ -31,6 +31,7 @@ services:
       - REDIS_DB=${REDIS_DB:-0}
       - REDIS_TLS_ENABLED=${REDIS_TLS_ENABLED:-false}
       - AKSK_ENABLED=${AKSK_ENABLED:-true}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://image.liweijun.com}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
     depends_on:
