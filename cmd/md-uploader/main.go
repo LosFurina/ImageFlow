@@ -172,8 +172,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Upload local images in a Markdown file to ImageFlow and replace references.\n")
 		fmt.Fprintf(os.Stderr, "AK/SK credentials MUST be set via environment variables (never pass as flags).\n\n")
 		fmt.Fprintf(os.Stderr, "Required environment variables:\n")
-		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_AK    Access Key\n")
-		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_SK    Secret Key\n\n")
+		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_AK                 Access Key\n")
+		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_SK                 Secret Key\n")
+		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_OPENAPI_ENDPOINT   ImageFlow OpenAPI endpoint (optional, overrides -endpoint flag)\n\n")
 		fmt.Fprintf(os.Stderr, "Flags:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
@@ -183,6 +184,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  %s -i article.md\n", os.Args[0])
 	}
 	flag.Parse()
+
+	// Environment variable overrides flag for endpoint
+	if envEndpoint := os.Getenv("IMAGEFLOW_OPENAPI_ENDPOINT"); envEndpoint != "" {
+		*endpoint = envEndpoint
+	}
 
 	if flag.NArg() < 1 {
 		flag.Usage()
