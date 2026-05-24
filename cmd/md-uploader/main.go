@@ -23,6 +23,14 @@ const (
 	defaultEndpoint = "http://localhost:8686"
 )
 
+// imageRef represents a found local image reference in markdown
+type imageRef struct {
+	rawRef  string // original text, e.g. "![[xxx.jpg]]" or "![alt](path)"
+	altText string // alt text for replacement
+	absPath string // absolute file path on disk
+	isWiki  bool   // true if Obsidian wiki link ![[...]]
+}
+
 // SignRequest computes the AK/SK HMAC signature for a request
 func SignRequest(ak, sk, method, path string, body []byte) (signature, timestamp string) {
 	ts := strconv.FormatInt(time.Now().Unix(), 10)
@@ -118,27 +126,56 @@ func UploadImage(endpoint, ak, sk string, imagePath string) (string, error) {
 	return url, nil
 }
 
-// FindLocalImages scans markdown for local image references
-// Returns a map of original reference -> absolute image path
-func FindLocalImages(mdContent string, mdDir string) map[string]string {
-	// Match ![alt](path) where path does not start with http:// or https://
-	re := regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
-	matches := re.FindAllStringSubmatch(mdContent, -1)
+// FindLocalImages scans markdown for local image references.
+// Supports both standard markdown ![alt](path) and Obsidian wiki links ![[filename]].
+// For wiki links, resolves against vaultRoot/assets/.
+func FindLocalImages(mdContent string, mdDir string, vaultRoot string) map[string]imageRef {
+	result := make(map[string]imageRef)
 
-	result := make(map[string]string)
-	for _, m := range matches {
+	// 1. Obsidian wiki links: ![[filename]] or ![[path/to/file.png]]
+	wikiRe := regexp.MustCompile(`!\[\[([^\]]+)\]\]`)
+	for _, m := range wikiRe.FindAllStringSubmatch(mdContent, -1) {
+		if len(m) < 2 {
+			continue
+		}
+		rawRef := m[0]
+		filename := strings.TrimSpace(m[1])
+
+		// For wiki links, try vaultRoot/assets/filename first
+		absPath := filepath.Join(vaultRoot, "assets", filename)
+		if _, err := os.Stat(absPath); err != nil {
+			// Fallback: try relative to markdown file dir
+			absPath = filepath.Join(mdDir, filename)
+			if _, err := os.Stat(absPath); err != nil {
+				continue
+			}
+		}
+
+		altText := filename
+		if idx := strings.LastIndex(altText, "."); idx > 0 {
+			altText = altText[:idx]
+		}
+
+		result[rawRef] = imageRef{
+			rawRef:  rawRef,
+			altText: altText,
+			absPath: absPath,
+			isWiki:  true,
+		}
+	}
+
+	// 2. Standard markdown links: ![alt](path)
+	mdRe := regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)`)
+	for _, m := range mdRe.FindAllStringSubmatch(mdContent, -1) {
 		if len(m) < 3 {
 			continue
 		}
-		ref := m[2] // the path inside parentheses
-		ref = strings.TrimSpace(ref)
+		rawRef := m[0]
+		altText := m[1]
+		ref := strings.TrimSpace(m[2])
 
-		// Skip URLs
-		if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") {
-			continue
-		}
-		// Skip data URIs
-		if strings.HasPrefix(ref, "data:") {
+		// Skip URLs and data URIs
+		if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") || strings.HasPrefix(ref, "data:") {
 			continue
 		}
 
@@ -148,17 +185,17 @@ func FindLocalImages(mdContent string, mdDir string) map[string]string {
 			absPath = filepath.Join(mdDir, ref)
 		}
 
-		// Only include if file exists
 		if _, err := os.Stat(absPath); err == nil {
-			result[ref] = absPath
+			result[rawRef] = imageRef{
+				rawRef:  rawRef,
+				altText: altText,
+				absPath: absPath,
+				isWiki:  false,
+			}
 		}
 	}
-	return result
-}
 
-type replacement struct {
-	oldRef string
-	newURL string
+	return result
 }
 
 func main() {
@@ -166,10 +203,12 @@ func main() {
 		endpoint = flag.String("endpoint", defaultEndpoint, "ImageFlow server endpoint")
 		inPlace  = flag.Bool("i", false, "Edit file in place")
 		output   = flag.String("o", "", "Output file path (default: stdout)")
+		vault    = flag.String("vault", "", "Obsidian vault root directory (for resolving ![[...]] wiki links). Defaults to markdown file's parent dir.")
 	)
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <markdown-file>\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Upload local images in a Markdown file to ImageFlow and replace references.\n")
+		fmt.Fprintf(os.Stderr, "Supports standard Markdown ![alt](path) and Obsidian wiki links ![[filename]].\n")
 		fmt.Fprintf(os.Stderr, "AK/SK credentials MUST be set via environment variables (never pass as flags).\n\n")
 		fmt.Fprintf(os.Stderr, "Required environment variables:\n")
 		fmt.Fprintf(os.Stderr, "  IMAGEFLOW_AK                 Access Key\n")
@@ -178,10 +217,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Flags:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
+		fmt.Fprintf(os.Stderr, "  # Standard markdown\n")
 		fmt.Fprintf(os.Stderr, "  export IMAGEFLOW_AK=xxx IMAGEFLOW_SK=yyy\n")
 		fmt.Fprintf(os.Stderr, "  %s article.md\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  # Obsidian vault with wiki links\n")
 		fmt.Fprintf(os.Stderr, "  export IMAGEFLOW_AK=xxx IMAGEFLOW_SK=yyy\n")
-		fmt.Fprintf(os.Stderr, "  %s -i article.md\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -vault ~/obsidian/note article.md\n", os.Args[0])
 	}
 	flag.Parse()
 
@@ -206,6 +247,11 @@ func main() {
 	mdPath := flag.Arg(0)
 	mdDir := filepath.Dir(mdPath)
 
+	vaultRoot := *vault
+	if vaultRoot == "" {
+		vaultRoot = mdDir
+	}
+
 	content, err := os.ReadFile(mdPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
@@ -214,7 +260,7 @@ func main() {
 	mdContent := string(content)
 
 	// Find local images
-	images := FindLocalImages(mdContent, mdDir)
+	images := FindLocalImages(mdContent, mdDir, vaultRoot)
 	if len(images) == 0 {
 		fmt.Fprintln(os.Stderr, "No local images found.")
 		fmt.Print(mdContent)
@@ -222,24 +268,27 @@ func main() {
 	}
 
 	fmt.Fprintf(os.Stderr, "Found %d local image(s):\n", len(images))
-	for ref := range images {
-		fmt.Fprintf(os.Stderr, "  - %s\n", ref)
+	for _, ref := range images {
+		fmt.Fprintf(os.Stderr, "  - %s\n", ref.rawRef)
 	}
 
 	// Upload each image and collect replacements
-	var reps []replacement
-	for ref, absPath := range images {
-		fmt.Fprintf(os.Stderr, "Uploading %s ... ", ref)
-		url, err := UploadImage(*endpoint, ak, sk, absPath)
+	replacements := make(map[string]string) // rawRef -> new markdown
+	for _, ref := range images {
+		fmt.Fprintf(os.Stderr, "Uploading %s ... ", filepath.Base(ref.absPath))
+		url, err := UploadImage(*endpoint, ak, sk, ref.absPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "FAILED: %v\n", err)
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "OK -> %s\n", url)
-		reps = append(reps, replacement{oldRef: ref, newURL: url})
+
+		// Build replacement markdown
+		newRef := fmt.Sprintf("![%s](%s)", ref.altText, url)
+		replacements[ref.rawRef] = newRef
 	}
 
-	if len(reps) == 0 {
+	if len(replacements) == 0 {
 		fmt.Fprintln(os.Stderr, "No images uploaded successfully.")
 		fmt.Print(mdContent)
 		os.Exit(1)
@@ -247,12 +296,8 @@ func main() {
 
 	// Replace references in markdown
 	newContent := mdContent
-	for _, r := range reps {
-		// Escape the old ref for regex (it might contain special chars like dots)
-		escaped := regexp.QuoteMeta(r.oldRef)
-		// Replace ![alt](oldRef) with ![alt](newURL)
-		re := regexp.MustCompile(`(!\[[^\]]*\]\()` + escaped + `\)`)
-		newContent = re.ReplaceAllString(newContent, "${1}"+r.newURL+")")
+	for rawRef, newRef := range replacements {
+		newContent = strings.ReplaceAll(newContent, rawRef, newRef)
 	}
 
 	// Output
