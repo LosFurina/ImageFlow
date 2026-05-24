@@ -53,7 +53,7 @@ func UploadImage(endpoint, ak, sk string, imagePath string) (string, error) {
 	// Build multipart body first (so we can sign it)
 	var bodyBuf bytes.Buffer
 	writer := multipart.NewWriter(&bodyBuf)
-	part, err := writer.CreateFormFile("images", filepath.Base(imagePath))
+	part, err := writer.CreateFormFile("images[]", filepath.Base(imagePath))
 	if err != nil {
 		return "", fmt.Errorf("create form file: %w", err)
 	}
@@ -89,17 +89,33 @@ func UploadImage(endpoint, ak, sk string, imagePath string) (string, error) {
 	}
 
 	var result struct {
-		Images []struct {
-			URL string `json:"url"`
-		} `json:"images"`
+		Results []struct {
+			URLs struct {
+				Original string `json:"original"`
+				WebP     string `json:"webp"`
+				AVIF     string `json:"avif"`
+			} `json:"urls"`
+		} `json:"results"`
 	}
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		return "", fmt.Errorf("parse response: %w", err)
 	}
-	if len(result.Images) == 0 {
+	if len(result.Results) == 0 {
 		return "", fmt.Errorf("no image returned")
 	}
-	return result.Images[0].URL, nil
+	// Prefer original URL, fallback to webp
+	url := result.Results[0].URLs.Original
+	if url == "" {
+		url = result.Results[0].URLs.WebP
+	}
+	if url == "" {
+		return "", fmt.Errorf("no URL in response")
+	}
+	// Make absolute URL if relative
+	if !strings.HasPrefix(url, "http") {
+		url = endpoint + url
+	}
+	return url, nil
 }
 
 // FindLocalImages scans markdown for local image references
